@@ -1,0 +1,12 @@
+{
+  "_note": "Rate card for /replica-flow --pitch. hours = effort per feature size (S small UI change, M a screen or a rule, L a subsystem, XL an integration). fixed = work every project has, added to phase 1. Calibrate against real projects. Fill hourly_rate before the first pitch.",
+  "hours": { "S": 4, "M": 12, "L": 32, "XL": 80 },
+  "fixed": [
+    { "item": "Project setup, hosting and CI", "hours": 16 },
+    { "item": "QA pass and launch support", "hours": 24 },
+    { "item": "Project management and client calls", "hours": 16 }
+  ],
+  "hourly_rate": { "PHP": null, "USD": null },
+  "team_hours_per_week": 40,
+  "contingency": 0.2
+}

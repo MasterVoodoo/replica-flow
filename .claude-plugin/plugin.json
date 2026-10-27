@@ -1,0 +1,14 @@
+{
+  "name": "replica-flow",
+  "description": "Clone any app's features with gates: the Replica pack (bundled) run end to end, plus flow mode, pitch mode and a Philippines/SEA wedge.",
+  "version": "2.1.0",
+  "author": {
+    "name": "Andrew Reyes",
+    "url": "https://github.com/MasterVoodoo"
+  },
+  "homepage": "https://github.com/MasterVoodoo/replica-flow",
+  "repository": "https://github.com/MasterVoodoo/replica-flow",
+  "license": "MIT",
+  "keywords": ["claude-code", "claude-skills", "app-clone", "replica", "philippines"],
+  "skills": "./skills/"
+}

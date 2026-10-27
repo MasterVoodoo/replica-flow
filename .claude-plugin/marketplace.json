@@ -1,0 +1,18 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "replica-flow",
+  "description": "replica-flow with the Replica skill pack bundled",
+  "owner": {
+    "name": "Andrew Reyes",
+    "url": "https://github.com/MasterVoodoo"
+  },
+  "plugins": [
+    {
+      "name": "replica-flow",
+      "description": "Clone any app's features with gates: recon, wedge, architect, design, build, backend, test, diff, entrepreneur, brand, launch, deploy. Includes the Replica pack.",
+      "source": "./",
+      "category": "productivity",
+      "homepage": "https://github.com/MasterVoodoo/replica-flow"
+    }
+  ]
+}
