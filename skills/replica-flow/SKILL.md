@@ -1,23 +1,24 @@
 ---
 name: replica-flow
-description: Runs the Replica pack (Jakeschincariol/replica-skill) end to end with gates (recon → wedge → architect → design → build → backend → test → diff → entrepreneur → brand → launch → deploy), plus three modes the pack lacks. Flow mode (`--flow`) rebuilds ONE flow of an app (e.g. Calendly booking) as a module inside an existing app. Pitch mode (`--pitch`) builds a thin prototype and a client pitch (preview, demo video, priced scope of work, proposal). The wedge localizes for the Philippines/SEA. Use for "/replica-flow <app>", "clone/replicate <app>", "copy the <X> flow into my app", "pitch a <product> clone to <client>", "resume replica from <phase>".
+description: Runs the Replica pack (Jakeschincariol/replica-skill) end to end with gates (recon → wedge → architect → design → build → backend → test → diff → entrepreneur → brand → launch → deploy), plus modes the pack lacks. Flow mode (`--flow`) rebuilds ONE flow of an app (e.g. Calendly booking) as a module inside an existing app. Pitch mode (`--pitch`) builds a thin prototype and a client pitch (preview, demo video, priced scope of work, proposal). The wedge localizes for the Philippines/SEA. Deep mode (`--deep`) adds a probe phase that uses REA (morluto/rea) to reverse engineer how a feature works from a local copy of the app, behind a clean-room spec firewall. Use for "/replica-flow <app>", "clone/replicate <app>", "copy the <X> flow into my app", "pitch a <product> clone to <client>", "resume replica from <phase>", "how does <app> do <feature> under the hood, then build it".
 metadata:
   author: Andrew Reyes
-  version: "2.1.0"
+  version: "2.2.0"
   domain: workflow
-  triggers: replica-flow, replica, replicate, clone this app, reverse engineer app, single flow, drop-in module, client pitch, scope of work, wedge, localize for Philippines
+  triggers: replica-flow, replica, replicate, clone this app, reverse engineer app, single flow, drop-in module, client pitch, scope of work, wedge, localize for Philippines, deep mode, probe, how does it work under the hood, REA
   role: orchestrator
   scope: workflow
   output-format: files
-  related-skills: replica-recon, replica-architect, replica-design, replica-build, replica-backend, replica-test, replica-diff, replica-entrepreneur, replica-brand, replica-launch, replica-deploy
+  related-skills: replica-recon, replica-architect, replica-design, replica-build, replica-backend, replica-test, replica-diff, replica-entrepreneur, replica-brand, replica-launch, replica-deploy, reverse-engineer-anything
 ---
 
-# replica-flow: the Replica pack, end to end, plus flow, pitch and wedge
+# replica-flow: the Replica pack, end to end, plus flow, pitch, wedge and deep
 
 An add-on to Jake Schincariol's Replica pack (https://github.com/Jakeschincariol/replica-skill, MIT).
 The pack does the work, phase by phase. This skill runs it in order with gates, and adds flow mode,
-pitch mode and the wedge phase. Clean-room: an app's **features and flows**, never its code, assets,
-copy or brand. Every phase enforces that; so does this.
+pitch mode, the wedge phase and deep mode. Clean-room: an app's **features and flows**, never its code,
+assets, copy or brand. Every phase enforces that; so does this. Deep mode reads the target's internals
+only in a separate subagent, and hands the build a behavioral spec, never code (see `probe.md`).
 
 ## Before anything: find the pack
 
@@ -53,6 +54,9 @@ The folder holding `replica-brand/` is `<pack>`.
 /replica-flow --flow "Calendly booking" --into ../my-app
 /replica-flow Calendly --pitch --client "Acme Clinic"  # prototype + pitch bundle, stops there
 /replica-flow --no-wedge <app>                         # skip the Philippine/SEA phase
+/replica-flow Obsidian --deep                          # + probe phase: REA on a local copy, spec-only handoff
+/replica-flow --flow "Obsidian sync" --deep            # --deep works in every mode
+/replica-flow --only probe                             # probe only (after recon)
 /replica-flow --from <phase>                           # resume, e.g. --from build
 /replica-flow --only <phase>                           # one phase
 /replica-flow <app> --until diff                       # stop after a phase
@@ -76,12 +80,15 @@ Nothing given and no `replica/recon.md` in the project → ask which app, nothin
 Invoke each with the **Skill** tool, in this order. Pass the app name/URL (and any user notes) as `args`
 to recon; later phases read `replica/`. After the wedge, every later phase's `args` starts with "honor
 replica/wedge.json adopted levers as hard requirements", then the phase's line from the table below.
+After a probe that wrote specs, it also starts with "read replica/spec/*.md for the probed features;
+never open replica/.probe/".
 
 Gates are minimums. Each phase still produces everything its own SKILL.md lists.
 
 | # | Skill | Reads | Gate before moving on |
 |---|---|---|---|
 | 1 | `replica-recon` | name/URL + slice, public pages, user's own account | `replica/recon.md` + `replica/features.csv` exist |
+| 1b | **probe** (`--deep` only; this skill: follow `probe.md` in this folder) | recon, local copy of the app | `replica/probe-targets.md` with the user's confirmation; each `replica/spec/*.md` passes `spec_check.py`, or skip recorded |
 | 2 | **wedge** (this skill: follow `wedge.md` in this folder) | recon | `replica/wedge.json` exists; every lever decided, every `adopt` has evidence |
 | 3 | `replica-architect` | recon, wedge | `replica/architecture.md` exists |
 | 4 | `replica-design` | recon, `replica/screens/` | `tokens.json` + `components.md` exist, `contrast.py` passes, primitives page builds |
@@ -94,7 +101,8 @@ Gates are minimums. Each phase still produces everything its own SKILL.md lists.
 | 11 | `replica-launch` | fixes, brand | `replica/launch/` written; `listing.py` passes |
 | 12 | `replica-deploy` | everything | preflight green **and user says go** |
 
-`--no-wedge`, or an audience outside PH/SEA, skips phase 2 (see `wedge.md`).
+`--no-wedge`, or an audience outside PH/SEA, skips phase 2 (see `wedge.md`). Phase 1b runs only with
+`--deep`; in flow and pitch mode it also runs right after recon.
 
 **Who creates the app:** design's Step 4 builds the primitives in code, so scaffold the app from
 `architecture.md`'s stack at the start of phase 4 (then commit). Build adds screens to it.
@@ -239,5 +247,8 @@ with real numbers so the next quote is closer.
   Storage the runtime already has (e.g. Node 22+ `node:sqlite`) behind one `db` file; a single owner
   account via a generated password hash in `.env.local` if login is needed; no payments or email. Write
   the ceiling (e.g. no persistence on serverless) in `backend.md`. A hosted service with keys is the user's call.
+- **Deep mode firewall.** REA output stays in `replica/.probe/` (gitignored, never committed, never in a
+  pitch bundle). Only the probe subagent reads it; this thread and every later phase read `replica/spec/`.
+  No REA installed → phase 1b is skipped with the install hint, nothing else changes.
 - **`.env.example` must be tracked.** Next.js's default `.gitignore` has `.env*`; add `!.env.example`.
 - After each phase, one line to the user: phase done, file(s) written, next phase.
