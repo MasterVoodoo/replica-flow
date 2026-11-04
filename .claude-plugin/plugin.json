@@ -1,7 +1,7 @@
 {
   "name": "replica-flow",
-  "description": "Clone any app's features with gates: the Replica pack (bundled) run end to end, plus flow mode, pitch mode and a Philippines/SEA wedge.",
-  "version": "2.1.0",
+  "description": "Clone any app's features with gates: the Replica pack (bundled) run end to end, plus flow mode, pitch mode, a Philippines/SEA wedge and an REA-powered deep mode.",
+  "version": "2.2.0",
   "author": {
     "name": "Andrew Reyes",
     "url": "https://github.com/MasterVoodoo"
